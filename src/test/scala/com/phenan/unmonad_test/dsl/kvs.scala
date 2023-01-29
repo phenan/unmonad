@@ -11,13 +11,12 @@ object kvs {
 
   object KVStore {
     case class Put[T](key: String, value: T) extends KVStore[Unit]
-
     case class Get[T](key: String) extends KVStore[T]
   }
 
   val kvs: Unmonad[KVStore] = Unmonad[KVStore]
 
-  val runKvs: UnmonadRunner[KVStore, Id] = kvs.freeRunner[Id] {
+  val runKvs: kvs.Runner[Id] = kvs.freeRunner[Id] {
     val map = mutable.Map.empty[String, Any]
     {
       [T] => (operation: KVStore[T]) =>

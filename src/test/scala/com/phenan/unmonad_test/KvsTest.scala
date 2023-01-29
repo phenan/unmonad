@@ -1,10 +1,10 @@
 package com.phenan.unmonad_test
 
-import com.phenan.unmonad_test.dsl.kvs._
+import com.phenan.unmonad_test.dsl.kvs.*
 import org.scalatest.funsuite.AnyFunSuite
 
-class UnmonadTest extends AnyFunSuite {
-  test("works") {
+class KvsTest extends AnyFunSuite {
+  test("kvs DSL correctly works") {
     val result = runKvs {
       put("foo", 10)
       put("bar", 20)
