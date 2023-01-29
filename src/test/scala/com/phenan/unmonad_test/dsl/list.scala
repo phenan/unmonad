@@ -1,7 +1,6 @@
 package com.phenan.unmonad_test.dsl
 
 import com.phenan.unmonad.Unmonad
-import com.phenan.unmonad_test.dsl.list.listU
 
 object list {
   val listU: Unmonad[List] = Unmonad[List]
