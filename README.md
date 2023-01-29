@@ -7,6 +7,38 @@ but unmonad does not use any macros for its implementation.
 unmonad is based on [context functions](https://docs.scala-lang.org/scala3/reference/contextual/context-functions.html) 
 and JVM exceptions.
 
+## Installation
+
+#### 1. Generate personal token for GitHub
+
+Access [`Settings` > `Developer settings` > `Personal access tokens` > `Tokens (classic)`](https://github.com/settings/tokens) and generate token.
+The token should have `read:packages` permission.
+
+Details: https://docs.github.com/en/packages/learn-github-packages/introduction-to-github-packages#authenticating-to-github-packages
+
+#### 2. Register tokens to git config
+
+```shell
+git config --global github.user <username>
+git config --global github.token <token>
+```
+
+#### 3. Add this line to your `./project/plugins.sbt`
+
+```sbt
+addSbtPlugin("com.codecommit" % "sbt-github-packages" % "0.5.3")
+```
+
+#### 4. Add these lines to your `./build.sbt`
+
+```sbt
+githubTokenSource := TokenSource.GitConfig("github.token")
+
+resolvers += Resolver.githubPackages("phenan", "unmonad")
+
+libraryDependencies += "com.phenan" %% "unmonad" % "0.1.0"
+```
+
 ## Usage
 
 ### async/await
