@@ -36,7 +36,7 @@ githubTokenSource := TokenSource.GitConfig("github.token")
 
 resolvers += Resolver.githubPackages("phenan", "unmonad")
 
-libraryDependencies += "com.phenan" %% "unmonad" % "0.1.0"
+libraryDependencies += "com.phenan" %% "unmonad" % "0.1.1"
 ```
 
 ## Usage
