@@ -1,7 +1,7 @@
 package com.phenan.unmonad_test.dsl
 
 import cats.Id
-import com.phenan.unmonad.{Unmonad, UnmonadRunner}
+import com.phenan.unmonad.Unmonad
 
 import scala.collection.mutable
 

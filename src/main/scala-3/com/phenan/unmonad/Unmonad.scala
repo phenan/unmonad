@@ -1,17 +1,23 @@
 package com.phenan.unmonad
 
+import cats.arrow.FunctionK
 import cats.Monad
 
 class Unmonad[F[_]] {
-  type Runner[M[_]] = UnmonadRunner[F, M]
   type Action[T] = UnmonadContext[F] ?=> T
-
-  def freeRunner[M[_]: Monad](run: [T] => F[T] => M[T]): Runner[M] = {
-    new UnmonadRunner[F, M](run)
+  
+  class Runner[M[_]] (runner: UnmonadRunner[F, M]) {
+    def apply[R](logic: UnmonadContext[F] ?=> R): M[R] = {
+      runner.run(context => logic(using context))
+    }
   }
 
-  def monadRunner(using monad: Monad[F]): Runner[F] = {
-    new UnmonadRunner[F, F]([T] => (ft: F[T]) => ft)
+  def freeRunner[M[_]: Monad](run: [T] => F[T] => M[T]): Runner[M] = {
+    Runner(UnmonadRunner[F, M](FunctionK.lift(run)))
+  }
+
+  def monadRunner(using Monad[F]): Runner[F] = {
+    Runner(UnmonadRunner[F, F](FunctionK.id[F]))
   }
 
   def action[T](ft: => F[T]): Action[T] = {

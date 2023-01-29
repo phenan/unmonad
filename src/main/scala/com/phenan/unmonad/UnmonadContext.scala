@@ -8,9 +8,10 @@ class UnmonadContext[F[_]] private (results: Seq[Any]) {
   private val queue: mutable.Queue[Any] = mutable.Queue.from(results)
 
   private[unmonad] def runAction[A](action: => F[A]): A = {
-    queue.removeHeadOption() match
+    queue.removeHeadOption() match {
       case Some(value) => value.asInstanceOf[A]
       case None => throw new UnmonadRollbackException(action)
+    }
   }
 
   private[unmonad] def addActionResult(result: Any): UnmonadContext[F] = {
