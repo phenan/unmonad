@@ -1,3 +1,5 @@
+organization := "com.phenan"
+
 name := "unmonad"
 
 version := "0.1.0-SNAPSHOT"
