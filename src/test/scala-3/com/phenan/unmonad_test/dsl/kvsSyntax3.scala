@@ -5,7 +5,7 @@ import com.phenan.unmonad.Unmonad
 
 import scala.collection.mutable
 
-object kvs {
+object kvsSyntax3 {
   // DSL定義
   sealed trait KVStore[A]
 
@@ -13,7 +13,7 @@ object kvs {
     case class Put[T](key: String, value: T) extends KVStore[Unit]
     case class Get[T](key: String) extends KVStore[T]
   }
-
+  
   val kvs: Unmonad[KVStore] = Unmonad[KVStore]
 
   val runKvs: kvs.Runner[Id] = kvs.freeRunner[Id] {

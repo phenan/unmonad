@@ -17,11 +17,11 @@ class Unmonad[F[_]] {
   }
 
   def monadRunner(using Monad[F]): Runner[F] = {
-    Runner(UnmonadRunner[F, F](FunctionK.id[F]))
+    Runner(UnmonadRunner.forMonad[F])
   }
 
   def action[T](ft: => F[T]): Action[T] = {
-    summon[UnmonadContext[F]].runAction(ft)
+    summon[UnmonadContext[F]].action(ft)
   }
 }
 
