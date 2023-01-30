@@ -2,7 +2,7 @@ organization := "com.phenan"
 
 name := "unmonad"
 
-version := "0.1.1"
+version := "1.0.0"
 
 scalaVersion := "3.2.2"
 
