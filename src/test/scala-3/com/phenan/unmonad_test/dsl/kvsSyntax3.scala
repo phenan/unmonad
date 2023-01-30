@@ -6,30 +6,9 @@ import com.phenan.unmonad.Unmonad
 import scala.collection.mutable
 
 object kvsSyntax3 {
-  // DSL定義
-  sealed trait KVStore[A]
+  val unmonad: Unmonad[kvs.KVStore] = Unmonad[kvs.KVStore]
+  val runKvs: unmonad.Runner[Id] = unmonad.freeRunner[Id](kvs.interpreter)
 
-  object KVStore {
-    case class Put[T](key: String, value: T) extends KVStore[Unit]
-    case class Get[T](key: String) extends KVStore[T]
-  }
-  
-  val kvs: Unmonad[KVStore] = Unmonad[KVStore]
-
-  val runKvs: kvs.Runner[Id] = kvs.freeRunner[Id] {
-    val map = mutable.Map.empty[String, Any]
-    {
-      [T] => (operation: KVStore[T]) =>
-        operation match {
-          case KVStore.Put(key, value) =>
-            map.put(key, value)
-            ()
-          case KVStore.Get(key) =>
-            map(key).asInstanceOf[T]
-        }
-    }
-  }
-
-  def put[T](key: String, value: T): kvs.Action[Unit] = kvs.action(KVStore.Put(key, value))
-  def get[T](key: String): kvs.Action[T] = kvs.action(KVStore.Get[T](key))
+  def put[T](key: String, value: T): unmonad.Action[Unit] = unmonad.action(kvs.KVStore.Put(key, value))
+  def get[T](key: String): unmonad.Action[T] = unmonad.action(kvs.KVStore.Get[T](key))
 }

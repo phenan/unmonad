@@ -13,7 +13,11 @@ class Unmonad[F[_]] {
   }
 
   def freeRunner[M[_]: Monad](run: [T] => F[T] => M[T]): Runner[M] = {
-    Runner(UnmonadRunner[F, M](FunctionK.lift(run)))
+    freeRunner(FunctionK.lift[F, M](run))
+  }
+
+  def freeRunner[M[_] : Monad](run: FunctionK[F, M]): Runner[M] = {
+    Runner(UnmonadRunner[F, M](run))
   }
 
   def monadRunner(using Monad[F]): Runner[F] = {
