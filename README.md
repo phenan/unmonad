@@ -1,4 +1,4 @@
-# unmonad
+# unmonad: macroless monadless
 
 unmonad provides procedural syntax for any monads in Scala.
 
@@ -35,7 +35,7 @@ githubTokenSource := TokenSource.GitConfig("github.token")
 
 resolvers += Resolver.githubPackages("phenan", "unmonad")
 
-libraryDependencies += "com.phenan" %% "unmonad" % "0.1.1"
+libraryDependencies += "com.phenan" %% "unmonad" % "1.0.0"
 ```
 
 ## Usage
