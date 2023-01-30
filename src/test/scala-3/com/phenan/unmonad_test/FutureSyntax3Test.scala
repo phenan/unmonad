@@ -1,13 +1,13 @@
 package com.phenan.unmonad_test
 
-import com.phenan.unmonad_test.dsl.future.*
+import com.phenan.unmonad_test.dsl.futureSyntax3.*
 import org.scalatest.funsuite.AnyFunSuite
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration.*
 import scala.concurrent.{Await, Future}
 
-class FutureTest extends AnyFunSuite {
+class FutureSyntax3Test extends AnyFunSuite {
   test("async/await") {
     val f: Future[String] = async {
       val hello = await(Future {

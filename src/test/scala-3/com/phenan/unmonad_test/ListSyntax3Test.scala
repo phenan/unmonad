@@ -1,9 +1,9 @@
 package com.phenan.unmonad_test
 
-import com.phenan.unmonad_test.dsl.list._
+import com.phenan.unmonad_test.dsl.listSyntax3._
 import org.scalatest.funsuite.AnyFunSuite
 
-class ListTest extends AnyFunSuite {
+class ListSyntax3Test extends AnyFunSuite {
   test("list monad") {
     val result = runList {
       val a = fork(1, 2, 3)
