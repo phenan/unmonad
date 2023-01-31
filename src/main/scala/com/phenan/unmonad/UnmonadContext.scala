@@ -1,7 +1,5 @@
 package com.phenan.unmonad
 
-import cats.Monad
-
 import scala.collection.mutable
 
 class UnmonadContext[F[_]] private (results: Seq[Any]) {
