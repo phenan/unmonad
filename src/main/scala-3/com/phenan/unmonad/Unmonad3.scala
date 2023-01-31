@@ -3,7 +3,7 @@ package com.phenan.unmonad
 import cats.arrow.FunctionK
 import cats.Monad
 
-class Unmonad[F[_]] {
+class Unmonad3[F[_]] {
   type Action[T] = UnmonadContext[F] ?=> T
   
   class Runner[M[_]] (runner: UnmonadRunner[F, M]) {
@@ -29,6 +29,6 @@ class Unmonad[F[_]] {
   }
 }
 
-object Unmonad {
-  def apply[F[_]]: Unmonad[F] = new Unmonad[F]
+object Unmonad3 {
+  def apply[F[_]]: Unmonad3[F] = new Unmonad3[F]
 }
