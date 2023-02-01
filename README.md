@@ -44,24 +44,28 @@ unmonad provides two types of procedural syntax.
 One is syntax like loan pattern, which is available in both Scala 2 and 3.
 The other is more concise syntax like async-await, which is available in Scala 3.
 
-### async/await
+### unmonad (available in both Scala 2 and 3)
 
-#### loan pattern style syntax (available in both Scala 2 and 3)
-
-The following code is a sample implementation of loan pattern syntax of async/await by unmonad.
+`unmonad` is a function that enables us to write a monadic program in a procedural style.
+The following code is a program using `Future` monad with `unmonad`:
 
 ```scala
-object futureSyntax {
-  def async[R](f: UnmonadContext[Future] => R)(implicit ec: ExecutionContext): Future[R] = {
-    UnmonadRunner.forMonad[Future].run(f)
-  }
+import com.phenan.unmonad._
+
+val f: Future[Int] = unmonad[Future] { await =>
+  val x = await(Future(1)) + await(Future(2))
+  val y = await(Future(3))
+  x + y
 }
 ```
 
-We can use this as follows:
+If you declare an alias of `unmonad[Future]` as `async`, 
+this program becomes very similar to a program with async/await.
 
 ```scala
-import futureSyntax._
+import com.phenan.unmonad._
+
+val async = unmonad[Future]
 
 val f: Future[Int] = async { await =>
   val x = await(Future(1)) + await(Future(2))
@@ -70,126 +74,25 @@ val f: Future[Int] = async { await =>
 }
 ```
 
-#### Scala 3 style
+### lift/unlift (available in Scala 3)
 
-In Scala 3, we can implement more concise syntax for async/await by `Unmonad`.
-This approach is based on [context functions](https://docs.scala-lang.org/scala3/reference/contextual/context-functions.html) in Scala 3.
-
-```scala
-object futureSyntax3 {
-  val unmonad: Unmonad[Future] = Unmonad[Future]
-  def async(using ec: ExecutionContext): unmonad.Runner[Future] = unmonad.monadRunner
-  def await[T](f: => Future[T]): unmonad.Action[T] = unmonad.action(f)
-}
-```
-
-We can use this as follows:
+In Scala 3, you can use more concise syntax; `lift` and `unlift`.
 
 ```scala
-import futureSyntax3.*
+import com.phenan.unmonad.*
 
-val f: Future[Int] = async {
-  val x = await(Future(1)) + await(Future(2))
-  val y = await(Future(3))
+val f: Future[Int] = lift[Future] {
+  val x = unlift(Future(1)) + unlift(Future(2))
+  val y = unlift(Future(3))
   x + y
 }
 ```
 
-### free monad
+`lift` uses [context functions](https://docs.scala-lang.org/scala3/reference/contextual/context-functions.html) feature in Scala 3,
+the subsequent block does not take the parameter `await`.
+Instead of `await` parameter, we can use `unlift` function.
 
-unmonad naturally supports `Free` monads, you can easily implement procedural syntax for your own DSLs.
 
-The following data type `KVStore` expresses a simple DSL of key-value store.
+### Use custom interpreter
 
-```scala
-sealed trait KVStore[A]
-object KVStore {
-  case class Put[T](key: String, value: T) extends KVStore[Unit]
-  case class Get[T](key: String) extends KVStore[T]
-}
-```
 
-This DSL has two operations, put and get.
-The interpreter of this operations can be implemented as a natural transformation from `KVStore` into `Id` as follows:
-
-```scala
-def interpreter: FunctionK[KVStore, Id] = new FunctionK[KVStore, Id] {
-  private val map = mutable.Map.empty[String, Any]
-
-  override def apply[A](operation: KVStore[A]): Id[A] = {
-    operation match {
-      case KVStore.Put(key, value) =>
-        map.put(key, value)
-        ()
-      case KVStore.Get(key) =>
-        map(key).asInstanceOf[A]
-    }
-  }
-}
-```
-
-#### loan pattern style syntax (available in both Scala 2 and 3)
-
-The declaration of the loan pattern style syntax for this DSL is:
-
-```scala
-def useKvs[R](logic: Actions => R): R = UnmonadRunner(interpreter).run[R] { context =>
-  logic(new Actions(context))
-}
-class Actions(context: UnmonadContext[KVStore]) {
-def put[T](key: String, value: T): Unit = context.action(KVStore.Put(key, value))
-def get[T](key: String): T = context.action(KVStore.Get[T](key))
-}
-```
-
-We can write the following code with this syntax:
-
-```scala
-import kvsSyntax._
-
-val result = useKvs { kvs =>
-  kvs.put("foo", 10)
-  kvs.put("bar", 20)
-  val x = kvs.get[Int]("foo")
-  val y = kvs.get[Int]("bar")
-  val z = x + y
-  kvs.put("baz", z)
-  kvs.get[Int]("baz")
-}
-println(result)   // 30
-```
-
-This program is very similar to the code using a mutable hash map, but the actual effects are hidden within the interpreter of the free monad.
-
-#### Scala 3 style
-
-We can omit every `kvs.` from the above code in Scala 3.
-To do this, we should implement syntax as follows:
-
-```scala
-object kvsSyntax3 {
-  val unmonad: Unmonad[KVStore] = Unmonad[KVStore]
-  val runKvs: unmonad.Runner[Id] = unmonad.freeRunner[Id](interpreter)
-  def put[T](key: String, value: T): unmonad.Action[Unit] = unmonad.action(KVStore.Put(key, value))
-  def get[T](key: String): unmonad.Action[T] = unmonad.action(KVStore.Get[T](key))
-}
-```
-
-We can write the following code by using this syntax:
-
-```scala
-import kvsSyntax._
-
-val result = runKvs {
-  put("foo", 10)
-  put("bar", 20)
-  val x = get[Int]("foo")
-  val y = get[Int]("bar")
-  val z = x + y
-  put("baz", z)
-  get[Int]("baz")
-}
-println(result)   // 30
-```
-
-`kvs.` is not needed in this code, because it is hidden under the context.
