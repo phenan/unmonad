@@ -4,5 +4,5 @@ import com.phenan.unmonad.unmonad
 import scala.concurrent.Future
 
 object futureSyntax {
-  val async: unmonad.Lifter[Future] = unmonad[Future]
+  val async: unmonad.Lifter[Future, Future] = unmonad[Future]
 }
