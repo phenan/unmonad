@@ -95,4 +95,78 @@ Instead of `await` parameter, we can use `unlift` function.
 
 ### Use custom interpreter
 
+Actually, the type parameter of `unmonad` or `lift` does not have to be a monad.
+If you specify a non-monad type for `unmonad` or `lift`, you should give a custom interpreter.
 
+Let's consider the following data type expressing key-value store operations:
+
+```scala
+sealed trait KVStore[A]
+object KVStore {
+  case class Put[T](key: String, value: T) extends KVStore[Unit]
+  case class Get[T](key: String) extends KVStore[T]
+}
+
+def put[T](key: String, value: T): KVStore[Unit] = KVStore.Put(key, value)
+def get[T](key: String): KVStore[T] = KVStore.Get[T](key)
+```
+
+We can define an interpreter of `KVStore` as follows:
+
+```scala
+def interpreter: FunctionK[KVStore, Id] = new FunctionK[KVStore, Id] {
+  private val map = mutable.Map.empty[String, Any]
+  override def apply[A](operation: KVStore[A]): Id[A] = {
+    operation match {
+      case KVStore.Put(key, value) =>
+        map.put(key, value)
+        ()
+      case KVStore.Get(key) =>
+        map(key).asInstanceOf[A]
+    }
+  }
+}
+```
+
+You can write a procedural program using `KVStore` by `unmonad` as follows:
+
+```scala
+val result = unmonad[KVStore].foldMap(interpreter) { unlift =>
+  unlift(put("foo", 10))
+  unlift(put("bar", 20))
+  val v = unlift(get[Int]("foo")) + unlift(get[Int]("bar"))
+  unlift(put("baz", v))
+  unlift(get[Int]("baz"))
+}
+println(result)  // 30
+```
+
+And also you can use `lift` / `unlift` in Scala 3:
+
+```scala
+val result = lift[KVStore].foldMap(interpreter) {
+  unlift(put("foo", 10))
+  unlift(put("bar", 20))
+  val v = unlift(get[Int]("foo")) + unlift(get[Int]("bar"))
+  unlift(put("baz", v))
+  unlift(get[Int]("baz"))
+}
+println(result)  // 30
+```
+
+Of course, you can declare several alias functions for readability like this:
+
+```scala
+val runKvs = lift[KVStore].foldMap(interpreter)
+def kvsPut[T](key: String, value: T) = unlift(put(key, value))
+def kvsGet[T](key: String) = unlift(get[T](key))
+
+val result = runKvs {
+  kvsPut("foo", 10)
+  kvsPut("bar", 20)
+  val v = kvsGet[Int]("foo") + kvsGet[Int]("bar")
+  kvsPut("baz", v)
+  kvsGet[Int]("baz")
+}
+println(result)  // 30
+```
