@@ -1,14 +1,10 @@
 package com.phenan.unmonad_test.dsl
 
-import cats.instances.future.*
-import com.phenan.unmonad.Unmonad
+import com.phenan.unmonad._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
 
 object futureSyntax3 {
-  val unmonad: Unmonad[Future] = Unmonad[Future]
-
-  def async(using ec: ExecutionContext): unmonad.Runner[Future] = unmonad.monadRunner
-
-  def await[T](f: => Future[T]): unmonad.Action[T] = unmonad.action(f)
+  val async: Lifter[Future, Future] = lift[Future]
+  def await[T](f: => Future[T]): UnmonadContext[Future] ?=> T = unlift[Future, T](f)
 }

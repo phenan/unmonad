@@ -1,8 +1,8 @@
 package com.phenan.unmonad_test.dsl
 
-import com.phenan.unmonad.{UnmonadContext, UnmonadRunner}
-import scala.concurrent.{ExecutionContext, Future}
+import com.phenan.unmonad._
+import scala.concurrent.Future
 
 object futureSyntax {
-  def async[R](f: UnmonadContext[Future] => R)(implicit ec: ExecutionContext): Future[R] = UnmonadRunner.forMonad[Future].run(f)
+  val async: UnmonadRunner[Future, Future] = unmonad[Future]
 }

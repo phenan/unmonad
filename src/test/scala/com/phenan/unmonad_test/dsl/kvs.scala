@@ -14,6 +14,9 @@ object kvs {
     case class Get[T](key: String) extends KVStore[T]
   }
 
+  def put[T](key: String, value: T): KVStore[Unit] = KVStore.Put(key, value)
+  def get[T](key: String): KVStore[T] = KVStore.Get[T](key)
+  
   def interpreter: FunctionK[KVStore, Id] = new FunctionK[KVStore, Id] {
     private val map = mutable.Map.empty[String, Any]
 
